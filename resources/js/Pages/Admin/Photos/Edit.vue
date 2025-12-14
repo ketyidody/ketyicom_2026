@@ -19,6 +19,7 @@ const form = useForm({
     image: null,
     display_order: props.photo.display_order,
     is_featured: props.photo.is_featured,
+    _method: 'PUT',
 });
 
 const imagePreview = ref(null);
@@ -26,7 +27,6 @@ const imagePreview = ref(null);
 const submit = () => {
     form.post(route('admin.photos.update', props.photo.id), {
         forceFormData: true,
-        _method: 'put',
     });
 };
 

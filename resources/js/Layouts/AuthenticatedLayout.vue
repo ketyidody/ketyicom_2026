@@ -65,6 +65,12 @@ const showingNavigationDropdown = ref(false);
                                     >
                                         Orders
                                     </NavLink>
+                                    <NavLink
+                                        :href="route('admin.settings.index')"
+                                        :active="route().current('admin.settings.*')"
+                                    >
+                                        Settings
+                                    </NavLink>
                                 </template>
                             </div>
                         </div>
@@ -198,6 +204,12 @@ const showingNavigationDropdown = ref(false);
                                 :active="route().current('admin.orders.*')"
                             >
                                 Orders
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('admin.settings.index')"
+                                :active="route().current('admin.settings.*')"
+                            >
+                                Settings
                             </ResponsiveNavLink>
                         </template>
                     </div>

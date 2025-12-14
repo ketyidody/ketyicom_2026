@@ -8,8 +8,11 @@ const mobileMenuOpen = ref(false);
 <template>
     <div class="min-h-screen bg-white text-gray-900">
         <!-- Announcement Banner -->
-        <div class="bg-black text-white text-center py-2 px-4 text-sm">
-            <p>Limited Edition Prints Available - Order Now</p>
+        <div
+            v-if="$page.props.announcements"
+            class="bg-black text-white text-center py-2 px-4 text-sm"
+            v-html="$page.props.announcements"
+        >
         </div>
 
         <!-- Navigation -->
@@ -106,24 +109,8 @@ const mobileMenuOpen = ref(false);
         <footer class="border-t border-gray-200 mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Newsletter -->
-                    <div>
-                        <h3 class="text-sm font-light tracking-wide mb-4">NEWSLETTER</h3>
-                        <p class="text-sm text-gray-600 mb-4">Get notified with new projects and updates</p>
-                        <form class="flex">
-                            <input
-                                type="email"
-                                placeholder="Your email"
-                                class="flex-1 bg-white border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:border-gray-400"
-                            />
-                            <button
-                                type="submit"
-                                class="bg-black text-white px-6 py-2 text-sm font-light tracking-wide hover:bg-gray-800 transition-colors"
-                            >
-                                SUBSCRIBE
-                            </button>
-                        </form>
-                    </div>
+                    <!-- Placeholder -->
+                    <div class="mb-4"></div>
 
                     <!-- Navigation Links -->
                     <div>

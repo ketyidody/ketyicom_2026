@@ -1,13 +1,101 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import LazyImage from '@/Components/Gallery/LazyImage.vue';
 
-defineProps({
+const props = defineProps({
     featuredPhotos: Array,
     albums: Array,
     canLogin: Boolean,
     canRegister: Boolean,
+});
+
+const carouselRef = ref(null);
+const showLeftArrow = ref(false);
+const showRightArrow = ref(true);
+const autoScrollInterval = ref(null);
+const isHovering = ref(false);
+
+// Duplicate photos for infinite scroll effect
+const infinitePhotos = computed(() => {
+    if (!props.featuredPhotos || props.featuredPhotos.length === 0) return [];
+    // Triple the array for seamless infinite scroll
+    return [...props.featuredPhotos, ...props.featuredPhotos, ...props.featuredPhotos];
+});
+
+const scroll = (direction) => {
+    if (!carouselRef.value) return;
+
+    const scrollAmount = carouselRef.value.offsetWidth * 0.5;
+    const newScrollLeft = carouselRef.value.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
+
+    carouselRef.value.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+    });
+};
+
+const updateArrows = () => {
+    if (!carouselRef.value) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = carouselRef.value;
+    showLeftArrow.value = scrollLeft > 0;
+    showRightArrow.value = scrollLeft < scrollWidth - clientWidth - 10;
+};
+
+const autoScroll = () => {
+    if (!carouselRef.value || isHovering.value) return;
+
+    const scrollSpeed = 1; // pixels per frame
+    const currentScroll = carouselRef.value.scrollLeft;
+    const maxScroll = carouselRef.value.scrollWidth - carouselRef.value.clientWidth;
+    const sectionWidth = carouselRef.value.scrollWidth / 3;
+
+    // Smooth continuous scroll
+    carouselRef.value.scrollLeft += scrollSpeed;
+
+    // Reset to middle section when reaching end of second section
+    if (currentScroll >= sectionWidth * 2) {
+        carouselRef.value.scrollLeft = sectionWidth;
+    }
+};
+
+const startAutoScroll = () => {
+    if (autoScrollInterval.value) return;
+    autoScrollInterval.value = setInterval(autoScroll, 30); // ~33fps
+};
+
+const stopAutoScroll = () => {
+    if (autoScrollInterval.value) {
+        clearInterval(autoScrollInterval.value);
+        autoScrollInterval.value = null;
+    }
+};
+
+const handleMouseEnter = () => {
+    isHovering.value = true;
+};
+
+const handleMouseLeave = () => {
+    isHovering.value = false;
+};
+
+onMounted(() => {
+    if (carouselRef.value && props.featuredPhotos?.length > 0) {
+        // Start at the middle section for seamless loop
+        const sectionWidth = carouselRef.value.scrollWidth / 3;
+        carouselRef.value.scrollLeft = sectionWidth;
+
+        // Start auto-scroll after a brief delay
+        setTimeout(() => {
+            startAutoScroll();
+        }, 500);
+    }
+});
+
+onUnmounted(() => {
+    stopAutoScroll();
 });
 </script>
 
@@ -17,51 +105,67 @@ defineProps({
     <PublicLayout>
         <!-- Hero Section with Featured Photos -->
         <div class="relative">
-            <!-- Admin Login Link (top right, subtle) -->
-            <div v-if="canLogin" class="absolute top-4 right-4 z-10">
-                <Link
-                    v-if="$page.props.auth.user"
-                    :href="route('dashboard')"
-                    class="text-xs text-gray-600 hover:text-gray-900 transition-colors tracking-wide"
-                >
-                    ADMIN
-                </Link>
-                <Link
-                    v-else
-                    :href="route('login')"
-                    class="text-xs text-gray-600 hover:text-gray-900 transition-colors tracking-wide"
-                >
-                    LOGIN
-                </Link>
-            </div>
-
-            <!-- Featured Photos Masonry Grid -->
-            <div v-if="featuredPhotos.length > 0" class="px-4 sm:px-6 lg:px-8 py-12">
-                <div class="max-w-7xl mx-auto">
-                    <div class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+            <!-- Featured Photos Carousel -->
+            <div v-if="featuredPhotos.length > 0" class="py-12 relative">
+                <div class="max-w-full">
+                    <!-- Carousel Container -->
+                    <div
+                        ref="carouselRef"
+                        @scroll="updateArrows"
+                        @mouseenter="handleMouseEnter"
+                        @mouseleave="handleMouseLeave"
+                        class="flex gap-4 overflow-x-auto scrollbar-hide px-4 sm:px-6 lg:px-8"
+                        style="scroll-behavior: auto;"
+                    >
                         <Link
-                            v-for="photo in featuredPhotos"
-                            :key="photo.id"
+                            v-for="(photo, index) in infinitePhotos"
+                            :key="`photo-${index}`"
                             :href="photo.album ? route('gallery.show', photo.album.slug) : '#'"
-                            class="block break-inside-avoid group"
+                            class="flex-none w-[60vw] sm:w-[49vw] md:w-[42vw] lg:w-[35vw] xl:w-[28vw] group"
                         >
-                            <div class="relative overflow-hidden bg-gray-100">
+                            <div class="relative overflow-hidden bg-gray-100 h-[49vh] max-h-[420px]">
                                 <LazyImage
                                     v-if="photo.medium_path"
                                     :src="`/storage/${photo.medium_path}`"
                                     :alt="photo.title"
-                                    class-name="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                                    class-name="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
                                 <!-- Overlay on hover -->
-                                <div class="absolute inset-0 bg-white bg-opacity-0 group-hover:bg-opacity-70 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center p-4">
-                                        <h3 class="text-gray-900 text-lg font-light tracking-wide">{{ photo.title }}</h3>
-                                        <p v-if="photo.album" class="text-gray-700 text-sm mt-1">{{ photo.album.title }}</p>
+                                        <h3 class="text-white text-xl md:text-2xl font-light tracking-wide">{{ photo.title }}</h3>
+                                        <p v-if="photo.album" class="text-gray-200 text-sm md:text-base mt-2">{{ photo.album.title }}</p>
                                     </div>
                                 </div>
                             </div>
                         </Link>
                     </div>
+
+                    <!-- Navigation Arrows -->
+                    <button
+                        v-if="showLeftArrow"
+                        @click="scroll('left')"
+                        @mouseenter="handleMouseEnter"
+                        @mouseleave="handleMouseLeave"
+                        class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-900 w-12 h-12 items-center justify-center rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                        aria-label="Previous"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button
+                        v-if="showRightArrow"
+                        @click="scroll('right')"
+                        @mouseenter="handleMouseEnter"
+                        @mouseleave="handleMouseLeave"
+                        class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-900 w-12 h-12 items-center justify-center rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                        aria-label="Next"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -132,8 +236,8 @@ defineProps({
         <!-- Shop CTA -->
         <div class="px-4 sm:px-6 lg:px-8 py-24 bg-black">
             <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-4xl font-light tracking-wide mb-6">SHOP PRINTS</h2>
-                <p class="text-gray-600 text-lg mb-8">High-quality prints available for your collection</p>
+                <h2 class="text-4xl font-light text-gray-500 tracking-wide mb-6" v-html="$page.props.shopctaTitle"></h2>
+                <div class="text-gray-600 text-lg mb-8" v-html="$page.props.shopctaDesc"></div>
                 <Link
                     :href="route('shop.index')"
                     class="inline-block bg-black text-white px-8 py-3 text-sm font-light tracking-wide hover:bg-gray-800 transition-colors"

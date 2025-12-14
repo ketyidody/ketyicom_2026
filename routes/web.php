@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AlbumController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PhotoController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GalleryController;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('products', ProductController::class);
     Route::resource('orders', OrderController::class)->except(['create', 'store']);
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::resource('settings', SettingController::class);
 });
 
 // Public gallery routes
