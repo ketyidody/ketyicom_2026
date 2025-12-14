@@ -225,7 +225,7 @@ onUnmounted(() => {
                 <div class="text-center mt-12">
                     <Link
                         :href="route('gallery.index')"
-                        class="inline-block border border-white text-gray-900 px-8 py-3 text-sm font-light tracking-wide hover:bg-white hover:text-black transition-colors"
+                        class="inline-block border border-gray-500 text-gray-900 px-8 py-3 text-sm font-light tracking-wide hover:bg-gray-100 hover:text-black transition-colors"
                     >
                         VIEW ALL ALBUMS
                     </Link>
