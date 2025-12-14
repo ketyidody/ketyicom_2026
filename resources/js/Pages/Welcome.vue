@@ -234,7 +234,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Shop CTA -->
-        <div class="px-4 sm:px-6 lg:px-8 py-24 bg-black">
+        <div class="px-4 sm:px-6 lg:px-8 py-24 bg-black" v-if="$page.props.shopctaTitle && $page.props.shopctaDesc">
             <div class="max-w-3xl mx-auto text-center">
                 <h2 class="text-4xl font-light text-gray-500 tracking-wide mb-6" v-html="$page.props.shopctaTitle"></h2>
                 <div class="text-gray-600 text-lg mb-8" v-html="$page.props.shopctaDesc"></div>
