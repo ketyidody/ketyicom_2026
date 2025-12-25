@@ -6,9 +6,11 @@ import LazyImage from '@/Components/Gallery/LazyImage.vue';
 
 const props = defineProps({
     product: Object,
+    isInCart: Boolean,
 });
 
 const quantity = ref(1);
+const productInCart = ref(props.isInCart);
 
 const form = useForm({
     product_id: props.product.id,
@@ -21,6 +23,7 @@ const addToCart = () => {
         preserveScroll: true,
         onSuccess: () => {
             quantity.value = 1;
+            productInCart.value = true;
         },
     });
 };
@@ -163,10 +166,11 @@ const decrementQuantity = () => {
                             <button
                                 type="button"
                                 @click="addToCart"
-                                :disabled="form.processing"
+                                :disabled="form.processing || productInCart"
                                 class="w-full bg-black text-white py-4 text-sm font-light tracking-wider hover:bg-gray-800 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 <span v-if="form.processing">ADDING TO CART...</span>
+                                <span v-else-if="productInCart">ALREADY IN CART</span>
                                 <span v-else>ADD TO CART</span>
                             </button>
 

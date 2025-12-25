@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CartItem;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -30,6 +31,9 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $sessionId = $request->session()->getId();
+        $cartCount = CartItem::where('session_id', $sessionId)->count();
+
         $baseData =  [
             ...parent::share($request),
             'auth' => [
@@ -41,6 +45,7 @@ class HandleInertiaRequests extends Middleware
             'announcements' => Setting::get('homepage.announcement', ''),
             'shopctaTitle' => Setting::get('homepage.shopcta.title', ''),
             'shopctaDesc' => Setting::get('homepage.shopcta.desc', ''),
+            'cartCount' => $cartCount,
         ]);
     }
 }

@@ -5,9 +5,15 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     setting: Object,
+});
+
+// Determine if current setting is an image based on path
+const isImageSetting = computed(() => {
+    return props.setting.text && props.setting.text.startsWith('settings/');
 });
 
 const form = useForm({
@@ -15,10 +21,40 @@ const form = useForm({
     text: props.setting.text,
     description: props.setting.description,
     active: props.setting.active,
+    image: null,
+    content_type: isImageSetting.value ? 'image' : 'text',
 });
 
+const imagePreview = ref(null);
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.image = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+const removeImage = () => {
+    form.image = null;
+    imagePreview.value = null;
+};
+
 const submit = () => {
-    form.put(route('admin.settings.update', props.setting.id));
+    if (form.image) {
+        // If uploading an image, use POST with _method override
+        form.transform((data) => ({
+            ...data,
+            _method: 'PUT',
+        })).post(route('admin.settings.update', props.setting.id));
+    } else {
+        // If no image, use regular PUT
+        form.put(route('admin.settings.update', props.setting.id));
+    }
 };
 </script>
 
@@ -66,7 +102,33 @@ const submit = () => {
                             <p class="mt-1 text-sm text-gray-500">Describe where this snippet is used</p>
                         </div>
 
+                        <!-- Content Type Selector -->
                         <div class="mb-4">
+                            <InputLabel value="Content Type" />
+                            <div class="mt-2 flex gap-4">
+                                <label class="flex items-center">
+                                    <input
+                                        type="radio"
+                                        v-model="form.content_type"
+                                        value="text"
+                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                                    />
+                                    <span class="ml-2 text-sm text-gray-700">Text/HTML</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input
+                                        type="radio"
+                                        v-model="form.content_type"
+                                        value="image"
+                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                                    />
+                                    <span class="ml-2 text-sm text-gray-700">Image</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Text/HTML Content -->
+                        <div v-if="form.content_type === 'text'" class="mb-4">
                             <InputLabel for="text" value="HTML Content" />
                             <textarea
                                 id="text"
@@ -76,6 +138,53 @@ const submit = () => {
                             ></textarea>
                             <InputError class="mt-2" :message="form.errors.text" />
                             <p class="mt-1 text-sm text-gray-500">Raw HTML content (will be rendered as-is on the website)</p>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div v-if="form.content_type === 'image'" class="mb-4">
+                            <!-- Current Image -->
+                            <div v-if="isImageSetting && !imagePreview" class="mb-4">
+                                <InputLabel value="Current Image" />
+                                <div class="mt-2">
+                                    <img :src="`/storage/${setting.text}`" alt="Current setting image" class="max-w-xs max-h-64 rounded border border-gray-300" />
+                                    <p class="mt-2 text-sm text-gray-500">Path: {{ setting.text }}</p>
+                                </div>
+                            </div>
+
+                            <InputLabel for="image" value="Upload New Image" />
+                            <div class="mt-2">
+                                <input
+                                    id="image"
+                                    type="file"
+                                    accept="image/*"
+                                    @change="handleImageChange"
+                                    class="block w-full text-sm text-gray-500
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded file:border-0
+                                        file:text-sm file:font-semibold
+                                        file:bg-blue-50 file:text-blue-700
+                                        hover:file:bg-blue-100"
+                                />
+                            </div>
+                            <InputError class="mt-2" :message="form.errors.image" />
+                            <p class="mt-1 text-sm text-gray-500">Upload an image file (max 10MB). This will replace the current image.</p>
+
+                            <!-- New Image Preview -->
+                            <div v-if="imagePreview" class="mt-4">
+                                <p class="text-sm text-gray-700 mb-2">New Image Preview:</p>
+                                <div class="relative inline-block">
+                                    <img :src="imagePreview" alt="Preview" class="max-w-xs max-h-64 rounded border border-gray-300" />
+                                    <button
+                                        type="button"
+                                        @click="removeImage"
+                                        class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-6">

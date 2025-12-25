@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import LazyImage from '@/Components/Gallery/LazyImage.vue';
+import Lightbox from '@/Components/Gallery/Lightbox.vue';
 
 const props = defineProps({
     featuredPhotos: Array,
@@ -16,6 +17,10 @@ const showLeftArrow = ref(false);
 const showRightArrow = ref(true);
 const autoScrollInterval = ref(null);
 const isHovering = ref(false);
+
+// Lightbox state
+const showLightbox = ref(false);
+const currentPhotoIndex = ref(0);
 
 // Duplicate photos for infinite scroll effect
 const infinitePhotos = computed(() => {
@@ -81,6 +86,22 @@ const handleMouseLeave = () => {
     isHovering.value = false;
 };
 
+// Lightbox functions
+const openLightbox = (index) => {
+    // Map the carousel index to the actual photo index (handling infinite scroll)
+    const actualIndex = index % props.featuredPhotos.length;
+    currentPhotoIndex.value = actualIndex;
+    showLightbox.value = true;
+};
+
+const closeLightbox = () => {
+    showLightbox.value = false;
+};
+
+const navigateToPhoto = (index) => {
+    currentPhotoIndex.value = index;
+};
+
 onMounted(() => {
     if (carouselRef.value && props.featuredPhotos?.length > 0) {
         // Start at the middle section for seamless loop
@@ -117,11 +138,11 @@ onUnmounted(() => {
                         class="flex gap-4 overflow-x-auto scrollbar-hide px-4 sm:px-6 lg:px-8"
                         style="scroll-behavior: auto;"
                     >
-                        <Link
+                        <div
                             v-for="(photo, index) in infinitePhotos"
                             :key="`photo-${index}`"
-                            :href="photo.album ? route('gallery.show', photo.album.slug) : '#'"
-                            class="flex-none w-[60vw] sm:w-[49vw] md:w-[42vw] lg:w-[35vw] xl:w-[28vw] group"
+                            @click="openLightbox(index)"
+                            class="flex-none w-[60vw] sm:w-[49vw] md:w-[42vw] lg:w-[35vw] xl:w-[28vw] group cursor-pointer"
                         >
                             <div class="relative overflow-hidden bg-gray-100 h-[49vh] max-h-[420px]">
                                 <LazyImage
@@ -135,10 +156,11 @@ onUnmounted(() => {
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center p-4">
                                         <h3 class="text-white text-xl md:text-2xl font-light tracking-wide">{{ photo.title }}</h3>
                                         <p v-if="photo.album" class="text-gray-200 text-sm md:text-base mt-2">{{ photo.album.title }}</p>
+                                        <p class="text-gray-300 text-xs mt-3 tracking-wider">CLICK TO VIEW</p>
                                     </div>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                     </div>
 
                     <!-- Navigation Arrows -->
@@ -246,5 +268,14 @@ onUnmounted(() => {
                 </Link>
             </div>
         </div>
+
+        <!-- Lightbox -->
+        <Lightbox
+            :photos="featuredPhotos"
+            :current-index="currentPhotoIndex"
+            :show="showLightbox"
+            @close="closeLightbox"
+            @navigate="navigateToPhoto"
+        />
     </PublicLayout>
 </template>

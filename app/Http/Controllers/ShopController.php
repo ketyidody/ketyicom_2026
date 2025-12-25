@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -45,15 +46,21 @@ class ShopController extends Controller
     /**
      * Display a single product.
      */
-    public function show(string $slug)
+    public function show(Request $request, string $slug)
     {
         $product = Product::where('slug', $slug)
             ->where('is_available', true)
             ->with('photo.album')
             ->firstOrFail();
 
+        $sessionId = $request->session()->getId();
+        $isInCart = CartItem::where('session_id', $sessionId)
+            ->where('product_id', $product->id)
+            ->exists();
+
         return Inertia::render('Shop/Show', [
             'product' => $product,
+            'isInCart' => $isInCart,
         ]);
     }
 }

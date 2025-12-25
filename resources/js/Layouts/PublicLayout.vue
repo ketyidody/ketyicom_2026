@@ -36,6 +36,20 @@ const mobileMenuOpen = ref(false);
                             GALLERY
                         </Link>
                         <Link
+                            :href="route('about')"
+                            class="text-sm font-light tracking-wide hover:text-gray-600 transition-colors"
+                            :class="{ 'text-black': $page.url === '/about', 'text-gray-500': $page.url !== '/about' }"
+                        >
+                            ABOUT
+                        </Link>
+                        <Link
+                            :href="route('contact')"
+                            class="text-sm font-light tracking-wide hover:text-gray-600 transition-colors"
+                            :class="{ 'text-black': $page.url === '/contact', 'text-gray-500': $page.url !== '/contact' }"
+                        >
+                            CONTACT
+                        </Link>
+                        <Link
                             :href="route('shop.index')"
                             class="text-sm font-light tracking-wide hover:text-gray-600 transition-colors"
                             :class="{ 'text-black': $page.url.startsWith('/shop'), 'text-gray-500': !$page.url.startsWith('/shop') }"
@@ -44,10 +58,16 @@ const mobileMenuOpen = ref(false);
                         </Link>
                         <Link
                             :href="route('cart.index')"
-                            class="text-sm font-light tracking-wide hover:text-gray-600 transition-colors"
+                            class="text-sm font-light tracking-wide hover:text-gray-600 transition-colors relative"
                             :class="{ 'text-black': $page.url.startsWith('/cart'), 'text-gray-500': !$page.url.startsWith('/cart') }"
                         >
                             CART
+                            <span
+                                v-if="$page.props.cartCount > 0"
+                                class="absolute -top-2 -right-3 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                            >
+                                {{ $page.props.cartCount }}
+                            </span>
                         </Link>
                     </div>
 
@@ -81,6 +101,22 @@ const mobileMenuOpen = ref(false);
                         GALLERY
                     </Link>
                     <Link
+                        :href="route('about')"
+                        class="block px-3 py-2 text-sm font-light tracking-wide hover:text-black transition-colors"
+                        :class="{ 'text-black': $page.url === '/about', 'text-gray-500': $page.url !== '/about' }"
+                        @click="mobileMenuOpen = false"
+                    >
+                        ABOUT
+                    </Link>
+                    <Link
+                        :href="route('contact')"
+                        class="block px-3 py-2 text-sm font-light tracking-wide hover:text-black transition-colors"
+                        :class="{ 'text-black': $page.url === '/contact', 'text-gray-500': $page.url !== '/contact' }"
+                        @click="mobileMenuOpen = false"
+                    >
+                        CONTACT
+                    </Link>
+                    <Link
                         :href="route('shop.index')"
                         class="block px-3 py-2 text-sm font-light tracking-wide hover:text-black transition-colors"
                         :class="{ 'text-black': $page.url.startsWith('/shop'), 'text-gray-500': !$page.url.startsWith('/shop') }"
@@ -90,11 +126,17 @@ const mobileMenuOpen = ref(false);
                     </Link>
                     <Link
                         :href="route('cart.index')"
-                        class="block px-3 py-2 text-sm font-light tracking-wide hover:text-black transition-colors"
+                        class="block px-3 py-2 text-sm font-light tracking-wide hover:text-black transition-colors relative"
                         :class="{ 'text-black': $page.url.startsWith('/cart'), 'text-gray-500': !$page.url.startsWith('/cart') }"
                         @click="mobileMenuOpen = false"
                     >
                         CART
+                        <span
+                            v-if="$page.props.cartCount > 0"
+                            class="ml-2 bg-black text-white text-xs px-2 py-0.5 rounded-full"
+                        >
+                            {{ $page.props.cartCount }}
+                        </span>
                     </Link>
                 </div>
             </div>
@@ -118,6 +160,12 @@ const mobileMenuOpen = ref(false);
                         <div class="space-y-2">
                             <Link :href="route('gallery.index')" class="block text-sm text-gray-600 hover:text-black transition-colors">
                                 Gallery
+                            </Link>
+                            <Link :href="route('about')" class="block text-sm text-gray-600 hover:text-black transition-colors">
+                                About
+                            </Link>
+                            <Link :href="route('contact')" class="block text-sm text-gray-600 hover:text-black transition-colors">
+                                Contact
                             </Link>
                             <Link :href="route('shop.index')" class="block text-sm text-gray-600 hover:text-black transition-colors">
                                 Shop

@@ -66,6 +66,12 @@ const showingNavigationDropdown = ref(false);
                                         Orders
                                     </NavLink>
                                     <NavLink
+                                        :href="route('admin.contact-messages.index')"
+                                        :active="route().current('admin.contact-messages.*')"
+                                    >
+                                        Messages
+                                    </NavLink>
+                                    <NavLink
                                         :href="route('admin.settings.index')"
                                         :active="route().current('admin.settings.*')"
                                     >
@@ -204,6 +210,12 @@ const showingNavigationDropdown = ref(false);
                                 :active="route().current('admin.orders.*')"
                             >
                                 Orders
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('admin.contact-messages.index')"
+                                :active="route().current('admin.contact-messages.*')"
+                            >
+                                Messages
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('admin.settings.index')"

@@ -53,7 +53,14 @@ class SettingController extends Controller
             'text' => 'nullable|string',
             'description' => 'nullable|string',
             'active' => 'boolean',
+            'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('settings', 'public');
+            $validated['text'] = $path;
+        }
 
         Setting::create($validated);
 
@@ -91,7 +98,19 @@ class SettingController extends Controller
             'text' => 'nullable|string',
             'description' => 'nullable|string',
             'active' => 'boolean',
+            'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists and is in settings folder
+            if ($setting->text && str_starts_with($setting->text, 'settings/')) {
+                \Storage::disk('public')->delete($setting->text);
+            }
+
+            $path = $request->file('image')->store('settings', 'public');
+            $validated['text'] = $path;
+        }
 
         $setting->update($validated);
 
@@ -104,6 +123,11 @@ class SettingController extends Controller
      */
     public function destroy(Setting $setting)
     {
+        // Delete associated image if it exists and is in settings folder
+        if ($setting->text && str_starts_with($setting->text, 'settings/')) {
+            \Storage::disk('public')->delete($setting->text);
+        }
+
         $setting->delete();
 
         return redirect()->route('admin.settings.index')

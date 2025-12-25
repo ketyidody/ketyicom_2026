@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import LazyImage from '@/Components/Gallery/LazyImage.vue';
 
@@ -7,6 +8,9 @@ const props = defineProps({
     cartItems: Array,
     total: Number,
 });
+
+const showRemoveModal = ref(false);
+const itemToRemove = ref(null);
 
 const updateQuantity = (cartItemId, quantity) => {
     router.patch(route('cart.update', cartItemId), {
@@ -16,10 +20,23 @@ const updateQuantity = (cartItemId, quantity) => {
     });
 };
 
-const removeItem = (cartItemId) => {
-    if (confirm('Remove this item from your cart?')) {
-        router.delete(route('cart.destroy', cartItemId), {
+const openRemoveModal = (item) => {
+    itemToRemove.value = item;
+    showRemoveModal.value = true;
+};
+
+const closeRemoveModal = () => {
+    showRemoveModal.value = false;
+    itemToRemove.value = null;
+};
+
+const confirmRemoveItem = () => {
+    if (itemToRemove.value) {
+        router.delete(route('cart.destroy', itemToRemove.value.id), {
             preserveScroll: true,
+            onFinish: () => {
+                closeRemoveModal();
+            },
         });
     }
 };
@@ -130,7 +147,7 @@ const decrementQuantity = (item) => {
                                         </div>
                                         <button
                                             type="button"
-                                            @click="removeItem(item.id)"
+                                            @click="openRemoveModal(item)"
                                             class="text-gray-500 hover:text-gray-900 transition-colors"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,5 +240,67 @@ const decrementQuantity = (item) => {
                 </div>
             </div>
         </div>
+
+        <!-- Remove Item Modal -->
+        <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showRemoveModal"
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+                @click.self="closeRemoveModal"
+            >
+                <Transition
+                    enter-active-class="transition ease-out duration-200"
+                    enter-from-class="opacity-0 scale-95"
+                    enter-to-class="opacity-100 scale-100"
+                    leave-active-class="transition ease-in duration-150"
+                    leave-from-class="opacity-100 scale-100"
+                    leave-to-class="opacity-0 scale-95"
+                >
+                    <div
+                        v-if="showRemoveModal"
+                        class="bg-white max-w-md w-full p-6"
+                    >
+                        <!-- Modal Header -->
+                        <div class="mb-6">
+                            <h3 class="text-xl font-light tracking-wide text-gray-900">REMOVE ITEM</h3>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="mb-8">
+                            <p class="text-gray-600 mb-4">Are you sure you want to remove this item from your cart?</p>
+                            <div v-if="itemToRemove" class="bg-gray-50 p-4">
+                                <p class="font-light text-gray-900">{{ itemToRemove.product.name }}</p>
+                                <p class="text-sm text-gray-500 mt-1">{{ itemToRemove.product.type.toUpperCase() }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Modal Actions -->
+                        <div class="flex gap-3">
+                            <button
+                                type="button"
+                                @click="closeRemoveModal"
+                                class="flex-1 bg-white border border-gray-300 text-gray-900 py-3 text-sm font-light tracking-wide hover:bg-gray-100 transition-colors"
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                type="button"
+                                @click="confirmRemoveItem"
+                                class="flex-1 bg-black text-white py-3 text-sm font-light tracking-wide hover:bg-gray-800 transition-colors"
+                            >
+                                REMOVE
+                            </button>
+                        </div>
+                    </div>
+                </Transition>
+            </div>
+        </Transition>
     </PublicLayout>
 </template>
