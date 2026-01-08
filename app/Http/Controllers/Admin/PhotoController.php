@@ -58,7 +58,7 @@ class PhotoController extends Controller
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'images' => 'required|array',
-            'images.*' => 'required|image|max:20480', // 20MB max per image
+            'images.*' => 'required|image|max:61440', // 60MB max per image
             'display_order' => 'nullable|integer',
             'is_featured' => 'boolean',
         ]);

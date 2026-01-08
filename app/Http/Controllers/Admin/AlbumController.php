@@ -41,7 +41,7 @@ class AlbumController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|max:20480',
+            'cover_image' => 'nullable|image|max:61440',
             'display_order' => 'nullable|integer',
             'is_published' => 'boolean',
         ]);
@@ -89,7 +89,7 @@ class AlbumController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|max:20480',
+            'cover_image' => 'nullable|image|max:61440',
             'display_order' => 'nullable|integer',
             'is_published' => 'boolean',
         ]);
