@@ -21,6 +21,7 @@ const form = useForm({
     stock: props.product.stock,
     image: null,
     is_available: props.product.is_available,
+    _method: 'PUT',
 });
 
 const imagePreview = ref(null);
@@ -28,7 +29,6 @@ const imagePreview = ref(null);
 const submit = () => {
     form.post(route('admin.products.update', props.product.id), {
         forceFormData: true,
-        _method: 'put',
     });
 };
 
