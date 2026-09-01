@@ -74,8 +74,9 @@ class TrackPageView
      */
     protected function shouldTrack(Request $request, Response $response): bool
     {
-        // Strict opt-in: only track when the visitor has accepted analytics cookies.
-        if ($request->cookie('cookie_consent') !== 'accepted') {
+        // Track by default (incl. the first visit, before any choice is made).
+        // Stop only once the visitor has explicitly declined analytics cookies.
+        if ($request->cookie('cookie_consent') === 'declined') {
             return false;
         }
 

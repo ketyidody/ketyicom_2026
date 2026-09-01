@@ -41,8 +41,8 @@ const choose = (consent) => {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <p class="text-sm text-gray-600 leading-relaxed">
                     We use cookies to measure website traffic — such as which pages are visited and
-                    which country visitors come from — so we can improve the site. No data is
-                    collected until you accept. See our
+                    which country visitors come from — so we can improve the site. You can decline
+                    to stop this tracking at any time. See our
                     <Link :href="route('about')" class="underline hover:text-black">privacy note</Link>
                     for details.
                 </p>

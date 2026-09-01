@@ -11,14 +11,16 @@ class TrafficTrackingTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_no_page_view_is_recorded_without_consent(): void
+    public function test_first_visit_is_tracked_before_any_choice(): void
     {
+        // No consent cookie yet — the visit should still be recorded.
         $this->get('/about')->assertOk();
 
-        $this->assertSame(0, PageView::count());
+        $this->assertSame(1, PageView::count());
+        $this->assertSame('/about', PageView::first()->url);
     }
 
-    public function test_page_view_is_recorded_after_consent(): void
+    public function test_page_view_is_recorded_after_accepting(): void
     {
         $this->withUnencryptedCookie('cookie_consent', 'accepted')
             ->get('/about')
