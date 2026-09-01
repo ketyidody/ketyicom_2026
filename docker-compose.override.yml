@@ -1,0 +1,21 @@
+# Development overrides — automatically merged by `docker compose`.
+#
+# Bind-mounts your source into the container so edits to PHP/Vue/seeders take
+# effect immediately (no image rebuild). It also brings in the host's vendor/
+# directory, which includes dev-only dependencies like Faker that the lean
+# production image intentionally omits — this is what lets factories/seeders run.
+#
+# Delete this file (or run `docker compose -f docker-compose.yml ...`) to test
+# the production-style baked image instead.
+services:
+  app:
+    volumes:
+      # Live source (includes host vendor/ with dev deps such as Faker)
+      - .:/var/www/html
+      # Keep the image's Vite-compiled assets (host has no public/build)
+      - /var/www/html/public/build
+      # Persist uploaded images in the named volume
+      - storage-data:/var/www/html/storage/app
+
+volumes:
+  storage-data:

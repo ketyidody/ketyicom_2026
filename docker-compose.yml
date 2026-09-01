@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ketyicom:latest
+    container_name: ketyicom-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      APP_URL: "${APP_URL:-http://localhost:8000}"
+      # Inside the network the DB is reached via the "db" service hostname.
+      # (.env uses 127.0.0.1 so your IDE/host connects through the published port.)
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: "${DB_DATABASE:-ketyicom}"
+      DB_USERNAME: "${DB_USERNAME:-ketyicom}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Persist uploaded images across rebuilds
+      - storage-data:/var/www/html/storage/app
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://127.0.0.1:8000/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: mysql:8.0
+    container_name: ketyicom-db
+    restart: unless-stopped
+    ports:
+      # Exposed to the host so you can connect directly from your IDE.
+      # Override the host port with FORWARD_DB_PORT if 3306 is taken locally.
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE:-ketyicom}"
+      MYSQL_USER: "${DB_USERNAME:-ketyicom}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  storage-data:
+  mysql-data:

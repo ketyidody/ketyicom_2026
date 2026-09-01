@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import CookieConsentBanner from '@/Components/CookieConsentBanner.vue';
 
 const mobileMenuOpen = ref(false);
 </script>
@@ -196,5 +197,8 @@ const mobileMenuOpen = ref(false);
                 </div>
             </div>
         </footer>
+
+        <!-- Cookie Consent Banner -->
+        <CookieConsentBanner />
     </div>
 </template>

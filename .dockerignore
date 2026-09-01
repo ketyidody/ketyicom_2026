@@ -1,0 +1,38 @@
+# Dependencies & build artifacts (rebuilt inside the image)
+/node_modules
+/vendor
+/public/build
+/public/hot
+/public/storage
+
+# Local environment & secrets
+.env
+.env.backup
+.env.production
+/auth.json
+
+# Version control & IDE
+.git
+.github
+.idea
+.vscode
+.zed
+.fleet
+.nova
+
+# Local runtime data — never ship the dev DB or caches into the image
+/database/database.sqlite
+/storage/app/public/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/pail
+*.log
+
+# Docker + misc
+docker-compose.override.yml
+.DS_Store
+Thumbs.db
+/.phpunit.cache
+.phpunit.result.cache
