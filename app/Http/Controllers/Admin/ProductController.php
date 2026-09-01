@@ -117,6 +117,9 @@ class ProductController extends Controller
 
             $validated['image'] = $request->file('image')
                 ->store('products', 'public');
+        } else {
+            // No new image uploaded: keep the existing one
+            unset($validated['image']);
         }
 
         $product->update($validated);
