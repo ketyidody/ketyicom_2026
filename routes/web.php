@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PhotoController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CookieConsentController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GalleryController;
@@ -58,7 +60,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('settings', SettingController::class);
     Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
     Route::patch('contact-messages/{contactMessage}/toggle-read', [ContactMessageController::class, 'toggleRead'])->name('contact-messages.toggle-read');
+    Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 });
+
+// Cookie consent
+Route::post('/cookie-consent', [CookieConsentController::class, 'store'])->name('cookie-consent.store');
 
 // Public gallery routes
 Route::prefix('gallery')->name('gallery.')->group(function () {

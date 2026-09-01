@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             'shopctaTitle' => Setting::get('homepage.shopcta.title', ''),
             'shopctaDesc' => Setting::get('homepage.shopcta.desc', ''),
             'cartCount' => $cartCount,
+            'cookieConsent' => $request->cookie('cookie_consent'),
         ]);
     }
 }

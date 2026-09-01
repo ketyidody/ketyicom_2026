@@ -14,6 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\TrackPageView::class,
+        ]);
+
+        // Keep the consent cookie unencrypted so both the tracking middleware
+        // and the client can read its plain value.
+        $middleware->encryptCookies(except: [
+            'cookie_consent',
         ]);
 
         $middleware->alias([
